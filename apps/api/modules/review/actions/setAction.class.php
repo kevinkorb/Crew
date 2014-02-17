@@ -56,18 +56,23 @@ class setAction extends crewAction
           if(!$this->gitCommand->commitIsInHistory($repository->getGitDir(), $branch->getCommitStatusChanged(), $commit))
           {
             $result['message'] = sprintf("Review has been %sengaged [old status : %s]", $branch->getReviewRequest() ? 're' : '', BranchPeer::getLabelStatus($branch->getStatus()));
+
             $branch->setReviewRequest(1)
               ->setStatus(BranchPeer::A_TRAITER)
               ->setIsBlacklisted(0)
               ->save()
             ;
-            
+
+			  $branch->getId()
+			$result['message'] =
             $request = new Request();
             $request
               ->setBranch($branch)
               ->setCommit($commit)
               ->save();
-            
+
+			$result['url'] = "http://crew.prologuetechnology.com/index.php/default/fileList?branch=" . $branch->getId();
+
             $this->getResponse()->setStatusCode('201');
             $this->dispatcher->notify(new sfEvent($this, 'notification.review-request', array('project-id' => $branch->getRepositoryId(), 'object' => $branch)));
           }
